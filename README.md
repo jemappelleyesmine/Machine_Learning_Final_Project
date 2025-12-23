@@ -23,3 +23,7 @@ build a predictive model using the learning data;
 estimate the future performances of the model on new data;
 
 provide the prediction of our model on the test set.
+
+
+
+Note: my local pathname is cd "/Users/yesminehachana/Desktop/Classes/Dauphine/2nd Year/1st Semester/Machine Learning/Project"

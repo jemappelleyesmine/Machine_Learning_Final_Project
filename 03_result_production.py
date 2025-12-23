@@ -1,8 +1,7 @@
 """
-Script 3 - Result Production (STRICT)
+Script 3 - Result Production
 ======================================
 Load test, predict, compute metrics, generate predictions.csv.
-Minimal script: run ONCE only.
 """
 
 import pandas as pd
@@ -34,11 +33,11 @@ prediction_data = pd.read_pickle('prediction.pkl')
 X_prediction = prediction_data.drop(columns=['primary_key'])
 y_prediction = model.predict(X_prediction)
 
-# Save predictions.csv in EXACT required format
+# Save predictions.csv in required format
 pd.DataFrame({
     'primary_key': prediction_data['primary_key'],
     'target': y_prediction
 }).to_csv('predictions.csv', index=False, sep=',', decimal='.')
 
 # Sanity check
-print(f"Predictions saved: {len(y_prediction)} rows (expected: 50044)")
+print(f"Predictions saved: {len(y_prediction)} rows")
