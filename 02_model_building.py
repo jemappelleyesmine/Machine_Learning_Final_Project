@@ -27,7 +27,7 @@ print("="*80)
 # Configuration
 RANDOM_STATE = 42
 DEBUG = False  # Set True to use subsample
-DEBUG_SIZE = 10000
+DEBUG_SIZE = 5000
 
 # =============================================================================
 # LOAD LEARNING SET (already merged in Script 1)
@@ -56,8 +56,8 @@ print("\nIdentifying feature types...")
 # Numeric: float64, int64 (excluding indicators which are already 0/1)
 numeric_features = X.select_dtypes(include=['float64', 'int64']).columns.tolist()
 
-# Categorical: object types
-categorical_features = X.select_dtypes(include=['object']).columns.tolist()
+# Categorical: object, category, bool types
+categorical_features = X.select_dtypes(include=['object', 'category', 'bool']).columns.tolist()
 
 # Remove known numeric-coded categoricals from numeric list
 numeric_coded_categoricals = [
@@ -78,7 +78,7 @@ print(f"Numeric: {len(numeric_features)}, Categorical: {len(categorical_features
 
 print("\nBuilding preprocessing pipeline...")
 
-# Numeric: Impute → Scale
+# Numeric: Impute → Scale (scaling kept for flexibility, not harmful for trees)
 numeric_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='median')),
     ('scaler', StandardScaler())
@@ -138,10 +138,11 @@ rf_pipeline = Pipeline([
     ('regressor', RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=-1))
 ])
 
+# Smaller grid for faster training (16 combinations instead of 54)
 param_grid_rf = {
-    'regressor__n_estimators': [100, 200, 300],
-    'regressor__max_depth': [10, 20, None],
-    'regressor__min_samples_split': [2, 5, 10],
+    'regressor__n_estimators': [100, 300],
+    'regressor__max_depth': [20, None],
+    'regressor__min_samples_split': [2, 10],
     'regressor__min_samples_leaf': [1, 2]
 }
 
@@ -171,6 +172,7 @@ gb_pipeline = Pipeline([
     ('regressor', GradientBoostingRegressor(random_state=RANDOM_STATE))
 ])
 
+# Focused grid for faster training
 param_grid_gb = {
     'regressor__n_estimators': [100, 200, 300],
     'regressor__learning_rate': [0.01, 0.05, 0.1],

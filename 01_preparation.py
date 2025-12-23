@@ -73,13 +73,16 @@ def merge_all(main, emp, job, ret_former, ret_jobs, ret_pension, sport, geo, job
     # Simplify job_desc: N3 → N2 (reduce from 408 to ~50 categories)
     df = df.merge(job_mapping[['N3', 'N2']], left_on='job_desc', right_on='N3', how='left', suffixes=('', '_cur'))
     df.rename(columns={'N2': 'job_desc_N2'}, inplace=True)
-    df.drop(columns=['N3'], inplace=True, errors='ignore')
 
+    # Simplify retired job_desc if exists
     if 'job_desc_retired' in df.columns:
         df = df.merge(job_mapping[['N3', 'N2']], left_on='job_desc_retired', right_on='N3',
                       how='left', suffixes=('', '_ret'))
         df.rename(columns={'N2': 'job_desc_N2_retired'}, inplace=True)
-        df.drop(columns=['N3_ret'], inplace=True, errors='ignore')
+
+    # Clean up ALL mapping helper columns (N3, N3_cur, N3_ret, N2, etc.)
+    for col in ['N3', 'N3_cur', 'N3_ret', 'N2', 'N2_ret']:
+        df.drop(columns=[col], errors='ignore', inplace=True)
 
     # Structural presence flags
     df['has_job'] = df['EMP_TYPE'].notna().astype(int)
