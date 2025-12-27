@@ -8,6 +8,7 @@ test multiple algorithms with GridSearchCV, select best model.
 import pandas as pd
 import numpy as np
 import joblib
+
 from sklearn.model_selection import cross_val_score, GridSearchCV, KFold
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
@@ -142,13 +143,13 @@ rf_pipeline = Pipeline([
     ('regressor', RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=-1))
 ])
 
-# EXTENDED GRID (no edge configurations)
-# Added values beyond previous optimal to ensure not at edge
+# GRID (refer to Hyperparameter_Tuning_Notes.docx for the complete iterative process)
+# Added values beyond previous optimal to ensure not at edge - Finished (only final value put down for faster compute)
 param_grid_rf = {
-    'regressor__n_estimators': [200, 300, 400],  # Extended: was [100, 300]
-    'regressor__max_depth': [15, 20, None],  # Extended: was [20, None]
-    'regressor__min_samples_split': [2, 5, 10],  # Extended: was [2, 10]
-    'regressor__min_samples_leaf': [1, 2, 4]  # Extended: was [1, 2]
+    'regressor__n_estimators': [2500], # always upper edge is chosen (2500), takes a very long time to process
+    'regressor__max_depth': [None], # good at none
+    'regressor__min_samples_split': [7], # good around 7
+    'regressor__min_samples_leaf': [1] # good around 1
 }
 
 print("Parameter grid:")
@@ -202,13 +203,14 @@ gb_pipeline = Pipeline([
     ('regressor', GradientBoostingRegressor(random_state=RANDOM_STATE))
 ])
 
-# EXTENDED GRID (no edge configurations)
-# Added values beyond previous optimal to ensure not at edge
+# GRID (refer to Hyperparameter_Tuning_Notes.docx for the complete iterative process)
+# Added values beyond previous optimal to ensure not at edge - Finished (only final value put down for faster compute)
 param_grid_gb = {
-    'regressor__n_estimators': [200, 300, 400],  # Extended: was [100, 200, 300]
-    'regressor__learning_rate': [0.05, 0.1, 0.15],  # Extended: was [0.01, 0.05, 0.1]
-    'regressor__max_depth': [5, 7, 9],  # Extended: was [3, 5, 7]
-    'regressor__min_samples_split': [2, 5, 10]  # Extended: was [2, 5]
+    'regressor__n_estimators': [2000], # (2000) takes a long time to compute
+    'regressor__learning_rate': [0.04], # good at around 0.04
+    'regressor__max_depth': [8], # good at around 8
+    'regressor__min_samples_split': [100], # good at around 100
+    'regressor__subsample': [0.8]  # good at around 0.8
 }
 
 print("Parameter grid:")

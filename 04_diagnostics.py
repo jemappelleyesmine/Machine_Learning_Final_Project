@@ -254,9 +254,9 @@ try:
     print("\nSaved: diagnostics_distributions.png")
     plt.close()
 
-    print("\n✓ Distribution monitoring complete")
-    print("  → Check for distribution shift between train and test")
-    print("  → Large differences may indicate data drift")
+    print("\n Distribution monitoring complete")
+    print("   Check for distribution shift between train and test")
+    print("   Large differences may indicate data drift")
 
 except FileNotFoundError:
     print(" learning.pkl not found - skipping distribution monitoring")
@@ -456,12 +456,5 @@ print("\nGenerated files:")
 print("  diagnostics_performance.png (4-panel error analysis)")
 print("  diagnostics_importance.png (top 15 features)")
 if 'learning' in locals():
-    print("  ✓ diagnostics_distributions.png (train vs test)")
-print("\nAll analysis follows best practices:")
-print("  Full error analysis (not just average)")
-print("  Study of worst predictions with characteristics")
-print("  Multiple importance metrics (RMSE, MAE, R²)")
-print("  Distribution monitoring (train vs test)")
-print("  Explicit non-causal warning")
-print("  Reproducible (fixed random seed)")
+    print("  diagnostics_distributions.png (train vs test)")
 print("=" * 80)
