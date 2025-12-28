@@ -61,7 +61,7 @@ print("Loading geographic data...")
 city_adm = pd.read_csv(DATA_PATH + 'city_adm.csv', dtype={'insee_code': str, 'Dep': str})
 city_loc = pd.read_csv(DATA_PATH + 'city_loc.csv', dtype={'insee_code': str})
 city_pop = pd.read_csv(DATA_PATH + 'city_pop.csv', dtype={'insee_code': str})
-departments = pd.read_csv(DATA_PATH + 'departments.csv', dtype=DTYPE_GEO)
+departments = pd.read_csv(DATA_PATH + 'departments.csv', dtype={'Reg': str, 'Dep': str})
 regions = pd.read_csv(DATA_PATH + 'regions.csv', dtype={'Reg': str})
 
 # Merge geographic data
