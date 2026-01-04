@@ -30,7 +30,9 @@ The geographic data integration involved merging five separate files: city admin
 
 All preprocessing was set up within scikit-learn pipelines.
 
-For numeric features (14 variables including age, working hours, remuneration, and community size), we applied median imputation. For categorical features (29 variables including sex, family type, occupation codes, and employment characteristics), we applied most-frequent imputation followed by one-hot encoding. Seven numeric-coded categorical variables (such as employee count and employer type) were manually reassigned from the numeric feature list to the categorical feature list. The same preprocessing was done for all models.
+We implemented a dual preprocessing strategy to meet the different requirements of the algorithms we choose as candidate models: a Linear Preprocessor for the Ridge baseline, and a Tree Preprocessor for Random Forest and Gradient Boosting models.
+
+For numeric features (14 variables including age, working hours, remuneration, and community size), we applied median imputation in both preprocessors, and in the linear one, these numerical features were further standardized through StandardScaler to ensure proper convergence. For categorical features (29 variables including sex, family type, occupation codes, and employment characteristics), we applied most-frequent imputation followed by one-hot encoding in both both preprocessors. Seven numeric-coded categorical variables (such as employee count and employer type) were manually reassigned from the numeric feature list to the categorical feature list. 
 
 ## Model selection and hyperparameter tuning
 
