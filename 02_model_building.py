@@ -10,9 +10,9 @@ import numpy as np
 import joblib
 
 from sklearn.model_selection import cross_val_score, GridSearchCV, KFold
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -79,11 +79,18 @@ print(f"  Categorical: {len(categorical_features)}")
 # CREATE PREPROCESSING PIPELINE
 # =============================================================================
 
-print("\nBuilding preprocessing pipeline...")
+print("\nBuilding preprocessing pipelines...")
 
-# Numeric: Impute ONLY (no scaling for tree models)
+# 1. Linear Preprocessor (SCALING IS MANDATORY)
+# Linear models need scaled features to converge and weight coefficients correctly
+numeric_transformer_linear = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', StandardScaler())
+])
+
+# 2. Tree Preprocessor (NO SCALING)
 # Trees/forests/boosting don't benefit from scaling and it wastes compute
-numeric_transformer = Pipeline(steps=[
+numeric_transformer_tree = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='median'))
 ])
 
@@ -93,28 +100,39 @@ categorical_transformer = Pipeline(steps=[
     ('onehot', OneHotEncoder(handle_unknown='ignore'))  # sparse by default
 ])
 
-# Combine
-preprocessor = ColumnTransformer(
+# Combine for Linear Models
+preprocessor_linear = ColumnTransformer(
     transformers=[
-        ('num', numeric_transformer, numeric_features),
+        ('num', numeric_transformer_linear, numeric_features),
         ('cat', categorical_transformer, categorical_features)
     ],
-    sparse_threshold=0.3  # Keep sparse if >30% sparse
+    sparse_threshold=0.3
 )
 
-print(" Pipeline created (imputation + one-hot encoding)")
+# Combine for Tree Models
+preprocessor_tree = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer_tree, numeric_features),
+        ('cat', categorical_transformer, categorical_features)
+    ],
+    sparse_threshold=0.3
+)
+
+print(" Pipelines created (Linear version with scaling, Tree version without)")
 
 # =============================================================================
-# BASELINE MODEL - Simple Decision Tree
+# BASELINE MODEL - Ridge Regression (Linear)
 # =============================================================================
 
 print("\n" + "=" * 80)
-print("BASELINE MODEL - Decision Tree")
+print("BASELINE MODEL - Ridge Regression")
 print("=" * 80)
 
+# Ridge (L2 regularization) handles multicollinearity from OneHotEncoding better than simple LinearRegression.
+
 baseline = Pipeline([
-    ('preprocessor', preprocessor),
-    ('regressor', DecisionTreeRegressor(max_depth=5, random_state=RANDOM_STATE))
+    ('preprocessor', preprocessor_linear),  # MUST use the scaled preprocessor
+    ('regressor', Ridge(alpha=1.0, random_state=RANDOM_STATE))
 ])
 
 # Quick 3-fold CV
@@ -123,7 +141,7 @@ baseline_scores = cross_val_score(baseline, X, y, cv=cv_quick,
                                   scoring='neg_root_mean_squared_error', n_jobs=-1)
 baseline_rmse = -baseline_scores.mean()
 
-print(f"Baseline RMSE: {baseline_rmse:.4f} ± {baseline_scores.std():.4f}")
+print(f"Baseline (Ridge) RMSE: {baseline_rmse:.4f} ± {baseline_scores.std():.4f}")
 
 # Train and save
 baseline.fit(X, y)
@@ -139,7 +157,7 @@ print("MODEL 1 - RANDOM FOREST")
 print("=" * 80)
 
 rf_pipeline = Pipeline([
-    ('preprocessor', preprocessor),
+    ('preprocessor', preprocessor_tree), # Use tree preprocessor (no scaling)
     ('regressor', RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=-1))
 ])
 
@@ -199,7 +217,7 @@ print("MODEL 2 - GRADIENT BOOSTING")
 print("=" * 80)
 
 gb_pipeline = Pipeline([
-    ('preprocessor', preprocessor),
+    ('preprocessor', preprocessor_tree),
     ('regressor', GradientBoostingRegressor(random_state=RANDOM_STATE))
 ])
 
@@ -259,6 +277,7 @@ print("MODEL SELECTION")
 print("=" * 80)
 
 print(f"\nResults:")
+print(f"  Baseline (Ridge):  {baseline_rmse:.4f}")
 print(f"  Random Forest:     {rf_rmse:.4f} ± {rf_std:.4f}")
 print(f"  Gradient Boosting: {gb_rmse:.4f} ± {gb_std:.4f}")
 
